@@ -12,7 +12,7 @@ class DBClient {
 
     this.client.connect()
       .then(() => {
-        this.db = this.client.db(this.dbName);
+        this.db = this.client.db(database);
         console.log('MongoDB connected successfully');
       })
       .catch((err) => {
