@@ -1,12 +1,12 @@
 // controllers/AuthController.js
 import { Buffer } from 'buffer';
+import { v4 as uuidv4 } from 'uuid';
 import redisClient from '../utils/redis';
 import dbClient from '../utils/db';
-import { v4 as uuidv4 } from 'uuid';
 
 class AuthController {
   static async getConnect(req, res) {
-    const auth = req.headers['authorization'];
+    const auth = req.headers.authorization;
     if (!auth) return res.status(401).json({ error: 'Unauthorized' });
 
     const [type, credentials] = auth.split(' ');
@@ -20,7 +20,7 @@ class AuthController {
     }
 
     const token = uuidv4();
-    await redisClient.set(`auth_${token}`, user._id, 86400);  // 24 hours
+    await redisClient.set(`auth_${token}`, user._id, 86400); // 24 hours
     res.status(200).json({ token });
   }
 

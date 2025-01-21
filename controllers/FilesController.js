@@ -1,12 +1,12 @@
 // controllers/FilesController.js
 import { Router } from 'express';
-import { redisClient } from '../utils/redis';
-import { dbClient } from '../utils/db';
 import { v4 as uuidv4 } from 'uuid';
 import fs from 'fs';
 import path from 'path';
 import bcrypt from 'bcryptjs';
 import util from 'util';
+import { dbClient } from '../utils/db';
+import { redisClient } from '../utils/redis';
 
 const router = Router();
 
@@ -23,7 +23,9 @@ async function getUserFromToken(token) {
 // POST /files - Upload a new file
 router.post('/', async (req, res) => {
   try {
-    const { name, type, data, parentId = 0, isPublic = false } = req.body;
+    const {
+      name, type, data, parentId = 0, isPublic = false,
+    } = req.body;
     const { token } = req.headers;
 
     // Get the user based on the token
@@ -70,7 +72,7 @@ router.post('/', async (req, res) => {
         type,
         parentId,
         isPublic,
-        localPath: filePath
+        localPath: filePath,
       };
       const result = await dbClient.db.collection('files').insertOne(file);
       return res.status(201).json(result.ops[0]);
@@ -82,7 +84,7 @@ router.post('/', async (req, res) => {
       name,
       type,
       parentId,
-      isPublic
+      isPublic,
     };
     const result = await dbClient.db.collection('files').insertOne(folder);
     return res.status(201).json(result.ops[0]);

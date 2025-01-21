@@ -1,12 +1,17 @@
 // utils/redis.js
+
 import redis from 'redis';
 
 class RedisClient {
   constructor() {
-    this.client = redis.createClient();
+    this.client = redis.createClient({
+      host: process.env.REDIS_HOST || 'localhost',
+      port: process.env.REDIS_PORT || 6379,
+    });
 
+    // Handle errors
     this.client.on('error', (err) => {
-      console.error('Redis error:', err);
+      console.error('Redis Error:', err);
     });
   }
 
@@ -16,31 +21,32 @@ class RedisClient {
 
   async get(key) {
     return new Promise((resolve, reject) => {
-      this.client.get(key, (err, result) => {
+      this.client.get(key, (err, reply) => {
         if (err) reject(err);
-        resolve(result);
+        resolve(reply);
       });
     });
   }
 
   async set(key, value, duration) {
     return new Promise((resolve, reject) => {
-      this.client.setex(key, duration, value, (err) => {
+      this.client.setex(key, duration, value, (err, reply) => {
         if (err) reject(err);
-        resolve(true);
+        resolve(reply);
       });
     });
   }
 
   async del(key) {
     return new Promise((resolve, reject) => {
-      this.client.del(key, (err) => {
+      this.client.del(key, (err, reply) => {
         if (err) reject(err);
-        resolve(true);
+        resolve(reply);
       });
     });
   }
 }
 
+// Export RedisClient instance
 const redisClient = new RedisClient();
 export default redisClient;
