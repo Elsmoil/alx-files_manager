@@ -1,41 +1,36 @@
+// utils/db.js
 import { MongoClient } from 'mongodb';
 
 class DBClient {
-    constructor() {
-        const host = process.env.DB_HOST || 'localhost';
-        const port = process.env.DB_PORT || '27017';
-        const database = process.env.DB_DATABASE || 'files_manager';
+	 constructor() {
+		 const host = process.env.DB_HOST || 'localhost';
+		 const port = process.env.DB_PORT || 27017;
+		 const database = process.env.DB_DATABASE || 'files_manager';
+		 this.url = `mongodb://${host}:${port}`;
+		 this.dbName = database;
+		 this.client = new MongoClient(this.url, { useNewUrlParser: true, useUnifiedTopology: true });
+                             }
 
-        const url = `mongodb://${host}:${port}`;
-        this.client = new MongoClient(url, { useUnifiedTopology: true });
-
-        this.client.connect()
-            .then(() => {
-                console.log('MongoDB connected successfully');
-                this.database = this.client.db(database); // Set database here
-            })
-            .catch((err) => {
-                console.error('MongoDB connection failed:', err);
-            });
-    }
-
-    async isAlive() {
-        try {
-            await this.database.admin().ping();
-            return true;
-        } catch {
-            return false;
+     async isAlive() {
+	try {
+		await this.client.connect();
+		return true;
+		} catch (err) {
+	          console.error(`MongoDB error: ${err}`);
+	          return false;
         }
     }
 
-    async nbUsers() {
-        if (!this.database) return 0;
-        return this.database.collection('users').countDocuments();
+	async nbUsers() {
+		    const db = this.client.db(this.dbName);
+		    const users = await db.collection('users').countDocuments();
+		    return users;
     }
 
-    async nbFiles() {
-        if (!this.database) return 0;
-        return this.database.collection('files').countDocuments();
+     async nbFiles() {
+	         const db = this.client.db(this.dbName);
+	         const files = await db.collection('files').countDocuments();
+	         return files;
     }
 }
 
