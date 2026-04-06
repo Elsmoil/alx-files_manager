@@ -7,8 +7,15 @@ import bcrypt from 'bcryptjs';
 import util from 'util';
 import { dbClient } from '../utils/db';
 import { redisClient } from '../utils/redis';
+import rateLimit from 'express-rate-limit';
 
 const router = Router();
+
+// Rate limiter for file uploads: maximum of 100 requests per 15 minutes per IP
+const fileUploadLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+});
 
 // Utility function to check token and get user from Redis
 async function getUserFromToken(token) {
@@ -21,7 +28,7 @@ async function getUserFromToken(token) {
 }
 
 // POST /files - Upload a new file
-router.post('/', async (req, res) => {
+router.post('/', fileUploadLimiter, async (req, res) => {
   try {
     const {
       name, type, data, parentId = 0, isPublic = false,
